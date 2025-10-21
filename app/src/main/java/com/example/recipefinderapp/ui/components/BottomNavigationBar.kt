@@ -35,7 +35,7 @@ fun BottomNavigationBar(navController: NavHostController) {
                         }
                     }
                 },
-                icon = { Icon(Icons.Default.Home, contentDescription = screen.title) },
+                icon = { screen.icon?.let { Icon(it, contentDescription = screen.title) } },
                 label = { Text(screen.title) }
             )
         }

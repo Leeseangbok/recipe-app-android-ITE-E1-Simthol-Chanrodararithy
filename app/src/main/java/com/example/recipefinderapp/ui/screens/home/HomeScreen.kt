@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
@@ -21,19 +22,26 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.recipefinderapp.domain.model.Meal
+import com.example.recipefinderapp.ui.navigation.Screen
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
     Scaffold(
         topBar = { TopAppBar(title = { Text("Recipe Finder") }) },
         content = { padding ->
-            HomeContent(Modifier.padding(padding))
+            HomeContent(
+                Modifier.padding(padding),
+                navController = navController
+            )
         }
     )
 }
 
 @Composable
-fun HomeContent(modifier: Modifier = Modifier){
+fun HomeContent(
+        modifier: Modifier = Modifier,
+        navController: NavController
+){
     val dummyMeals = listOf(
         Meal("1", "Pasta", "Italian", "Europe", "Boil water...", "https://via.placeholder.com/150"),
         Meal("2", "Sushi", "Japanese", "Asia", "Roll rice...", "https://via.placeholder.com/150")
@@ -49,8 +57,10 @@ fun HomeContent(modifier: Modifier = Modifier){
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(4.dp),
-                onClick = {}
+                    .padding(4.dp)
+                    .clickable {
+                        navController.navigate(Screen.Detail.createRoute(meal.id))
+                    }
             ){
                 Row(
                     verticalAlignment = Alignment.CenterVertically
