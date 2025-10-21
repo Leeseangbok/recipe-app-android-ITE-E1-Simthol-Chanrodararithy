@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -42,7 +43,8 @@ fun HomeContent(
     navController: NavController
 ) {
     LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.padding(4.dp)
     ) {
         item { PopularMealsSection(navController) }
         item { RandomMealSection(navController) }
@@ -61,7 +63,11 @@ fun PopularMealsSection(
     )
 
     Column {
-        Text("Popular Meals", style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = "Popular Meals",
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier.padding(horizontal = 8.dp)
+        )
         Spacer(Modifier.height(8.dp))
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             items(popularMeals){ meal->
@@ -104,7 +110,11 @@ fun RandomMealSection(navController: NavController){
     )
 
     Column {
-        Text("Suggestion", style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = "Suggestion",
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier.padding(horizontal = 8.dp)
+        )
         Spacer(Modifier.height(8.dp))
 
         Card(
@@ -133,7 +143,11 @@ fun RandomMealSection(navController: NavController){
 fun CategorySection(navController: NavController){
     val categories = listOf("Beef", "Chicken", "Dessert", "Seafood", "Vegetarian")
     Column {
-        Text("Categories", style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = "Category",
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier.padding(horizontal = 8.dp)
+        )
         Spacer(Modifier.height(8.dp))
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)){
             items(categories){ category->
@@ -159,7 +173,11 @@ fun AreaSection(navController: NavController) {
     val areas = listOf("Italian", "Japanese", "American", "Indian", "Mexican")
 
     Column {
-        Text("Area", style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = "Area",
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier.padding(horizontal = 8.dp)
+        )
         Spacer(Modifier.height(8.dp))
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             items(areas) { area ->

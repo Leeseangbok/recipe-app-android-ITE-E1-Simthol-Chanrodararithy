@@ -56,6 +56,7 @@ fun shouldShowBottomBar(destination: NavDestination?): Boolean {
     return destination?.hierarchy?.any{
         it.route == Screen.Home.route ||
                 it.route == Screen.Explore.route ||
-                it.route == Screen.Favorites.route
+                it.route == Screen.Favorites.route ||
+                it.route == Screen.Detail.route
     } == true
 }
