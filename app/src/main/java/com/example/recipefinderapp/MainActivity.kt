@@ -3,6 +3,7 @@ package com.example.recipefinderapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -10,6 +11,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -33,6 +35,7 @@ class MainActivity : ComponentActivity() {
 
                 val showBottomBar = shouldShowBottomBar(currentDestination)
                 Scaffold(
+                    contentWindowInsets = WindowInsets(0.dp),
                     bottomBar = {
                         if(showBottomBar) {
                             BottomNavigationBar(navController)

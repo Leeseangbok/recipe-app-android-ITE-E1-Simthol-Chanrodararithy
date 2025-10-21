@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -18,8 +19,9 @@ import androidx.navigation.NavHostController
 @Composable
 fun ExploreScreen(navController: NavHostController) {
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Explore") })},
         content = { padding ->
+            Text("Explore", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(8.dp))
             Column(
                 modifier = Modifier
                     .padding(padding)

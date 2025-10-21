@@ -60,6 +60,7 @@ dependencies {
     // Hilt DI
     implementation(libs.hilt.android)
     implementation(libs.androidx.material3)
+    implementation(libs.litert.support.api)
     kapt(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
 
