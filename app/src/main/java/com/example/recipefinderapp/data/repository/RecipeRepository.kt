@@ -10,6 +10,7 @@ class RecipeRepository(
     private val dao: RecipeDao
 ) {
     suspend fun getMeals() = api.getMeals()
+    suspend fun getMealById(mealId: String) = api.getMealById(mealId)
     suspend fun getCategories() = api.getCategories()
 
     fun getFavorites(): Flow<List<RecipeEntity>> = dao.getAllFavorites()

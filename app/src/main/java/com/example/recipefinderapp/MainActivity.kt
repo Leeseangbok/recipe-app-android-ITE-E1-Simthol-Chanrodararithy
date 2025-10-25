@@ -21,8 +21,10 @@ import com.example.recipefinderapp.ui.components.BottomNavigationBar
 import com.example.recipefinderapp.ui.navigation.AppNavGraph
 import com.example.recipefinderapp.ui.navigation.Screen
 import com.example.recipefinderapp.ui.theme.RecipeFinderAppTheme
+import dagger.hilt.android.AndroidEntryPoint
 
 @ExperimentalMaterial3Api
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

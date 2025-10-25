@@ -70,9 +70,24 @@ fun Navigation(navController: NavHostController) {
         composable(Screen.Home.route) {
             HomeScreen(navController)
         }
-        composable(Screen.Explore.route) {
+        composable(
+            route = Screen.Explore.route,
+            arguments = listOf(
+                navArgument("category") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = "All"
+                },
+                navArgument("area") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = "All"
+                }
+            )
+        ) {
             ExploreScreen(navController)
         }
+
         composable(Screen.Favorites.route) {
             FavoriteScreen(navController)
         }
@@ -84,5 +99,4 @@ fun Navigation(navController: NavHostController) {
             MealDetailScreen(navController = navController, mealId = mealId)
         }
     }
-
 }
