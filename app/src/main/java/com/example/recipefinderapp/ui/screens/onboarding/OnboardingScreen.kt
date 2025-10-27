@@ -1,31 +1,21 @@
 package com.example.recipefinderapp.ui.screens.onboarding
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -36,66 +26,109 @@ import com.example.recipefinderapp.R
 import com.example.recipefinderapp.ui.navigation.Screen
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun OnboardingScreen(navController: NavController){
+fun OnboardingScreen(navController: NavController) {
     val pages = listOf(
         OnboardingPage(
             title = "Welcome to Recipe Finder",
-            description = "Discover and save your favorite recipes",
+            description = "Discover and save your favorite recipes effortlessly.",
             image = R.drawable.food
         ),
         OnboardingPage(
             title = "Explore Recipes",
-            description = "Browse popular categories and cuisines from around the world.",
+            description = "Browse popular cuisines and find meals you’ll love.",
             image = R.drawable.meats
         ),
         OnboardingPage(
             title = "Save Your Favorites",
-            description = "Keep your favorite recipes for quick access anytime.",
+            description = "Bookmark your top picks and revisit them anytime.",
             image = R.drawable.vegetable
         )
     )
+
     val pagerState = rememberPagerState(pageCount = { pages.size })
     val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
-        bottomBar = {
-            BottomAppBar(containerColor = MaterialTheme.colorScheme.background) {
-                Row(
+        containerColor = Color.Transparent
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                            MaterialTheme.colorScheme.background
+                        )
+                    )
+                )
+                .padding(padding)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+
+                // Skip button top-right
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    contentAlignment = Alignment.CenterEnd
                 ) {
                     TextButton(onClick = {
-                        // Skip → go to Home
                         navController.navigate(Screen.Home.route) {
                             popUpTo(Screen.Onboarding.route) { inclusive = true }
                         }
                     }) {
-                        Text("Skip")
+                        Text("Skip", color = MaterialTheme.colorScheme.primary)
                     }
+                }
 
-                    Row {
-                        repeat(pages.size) { index ->
-                            val isSelected = pagerState.currentPage == index
-                            Box(
-                                modifier = Modifier
-                                    .padding(4.dp)
-                                    .size(if (isSelected) 12.dp else 8.dp)
-                                    .then(
-                                        if (isSelected)
-                                            Modifier.background(MaterialTheme.colorScheme.primary, shape = MaterialTheme.shapes.small)
-                                        else
-                                            Modifier.background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f), shape = MaterialTheme.shapes.small)
-                                    )
-                            )
-                        }
+                Spacer(modifier = Modifier.height(24.dp))
+
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) { page ->
+                    OnboardingPageContent(pages[page])
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Page indicator dots
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    repeat(pages.size) { index ->
+                        val isSelected = pagerState.currentPage == index
+                        val size by animateFloatAsState(if (isSelected) 12f else 6f)
+                        Box(
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .size(size.dp)
+                                .background(
+                                    if (isSelected)
+                                        MaterialTheme.colorScheme.primary
+                                    else
+                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                                    CircleShape
+                                )
+                        )
                     }
+                }
 
-                    Button(onClick = {
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Next / Start button
+                Button(
+                    onClick = {
                         coroutineScope.launch {
                             if (pagerState.currentPage == pages.lastIndex) {
                                 navController.navigate(Screen.Home.route) {
@@ -105,52 +138,75 @@ fun OnboardingScreen(navController: NavController){
                                 pagerState.animateScrollToPage(pagerState.currentPage + 1)
                             }
                         }
-                    }) {
-                        Text(if (pagerState.currentPage == pages.lastIndex) "Start" else "Next")
-                    }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(0.85f)
+                        .height(54.dp),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text(
+                        text = if (pagerState.currentPage == pages.lastIndex) "Get Started" else "Next",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
+
+                Spacer(modifier = Modifier.height(32.dp))
             }
-        }
-    ) { padding ->
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) { page ->
-            OnboardingPageContent(pages[page])
         }
     }
 }
 
 @Composable
 fun OnboardingPageContent(page: OnboardingPage) {
+    val scale by animateFloatAsState(targetValue = 1f)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(32.dp),
+            .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Image(
             painter = painterResource(id = page.image),
             contentDescription = page.title,
-            modifier = Modifier.size(240.dp)
+            modifier = Modifier
+                .size(260.dp)
+                .scale(scale)
         )
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = page.title,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = page.description,
-            fontSize = 16.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
+        Spacer(modifier = Modifier.height(36.dp))
+
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(24.dp),
+            tonalElevation = 2.dp,
+            shadowElevation = 4.dp,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = page.title,
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 22.sp
+                    ),
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = page.description,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    ),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
     }
 }
 

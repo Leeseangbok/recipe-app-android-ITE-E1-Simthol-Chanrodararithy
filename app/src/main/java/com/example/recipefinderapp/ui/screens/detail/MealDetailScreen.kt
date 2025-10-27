@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -38,6 +39,7 @@ fun MealDetailScreen(
 ) {
     val meal by viewModel.meal.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val isFavorite by viewModel.isFavorite.collectAsState() // --- NEW ---
     val context = LocalContext.current
 
     if (isLoading) {
@@ -175,8 +177,6 @@ fun MealDetailScreen(
 
                 Spacer(Modifier.height(40.dp))
             }
-
-            // --- Floating Back Button ---
             IconButton(
                 onClick = { navController.navigateUp() },
                 modifier = Modifier
@@ -193,6 +193,25 @@ fun MealDetailScreen(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
                     tint = Color.White
+                )
+            }
+
+            IconButton(
+                onClick = { viewModel.toggleFavorite() },
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .padding(12.dp)
+                    .size(40.dp)
+                    .align(Alignment.TopEnd)
+                    .background(
+                        color = Color.Black.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(50)
+                    )
+            ) {
+                Icon(
+                    imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                    contentDescription = "Favorite",
+                    tint = if (isFavorite) Color.Red else Color.White
                 )
             }
         }

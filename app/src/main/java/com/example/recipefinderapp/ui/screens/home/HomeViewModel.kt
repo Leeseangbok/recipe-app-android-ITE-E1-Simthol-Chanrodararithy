@@ -44,7 +44,10 @@ class HomeViewModel @Inject constructor(
 
                 _meals.value = allMeals
                 _categories.value = allCategories
-                _randomMeal.value = allMeals.randomOrNull()
+
+                if (_randomMeal.value == null) {
+                    _randomMeal.value = allMeals.randomOrNull()
+                }
 
             } catch (e: Exception) {
                 _meals.value = emptyList()

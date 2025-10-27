@@ -26,26 +26,6 @@ fun AppNavGraph(navController: NavHostController) {
     val currentRoute = navBackStackEntry?.destination?.route
 
     Scaffold(
-//        topBar = {
-//            if (currentRoute != Screen.Onboarding.route &&
-//                currentRoute != Screen.Detail.route.replace("{mealId}", "")
-//            ) {
-//                CenterAlignedTopAppBar(
-//                    title = {
-//                        Text(
-//                            text = "Recipe Finder",
-//                            style = MaterialTheme.typography.titleLarge,
-//                            textAlign = TextAlign.Center,
-//                            modifier = Modifier.fillMaxWidth()
-//                        )
-//                    },
-//                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-//                        containerColor = MaterialTheme.colorScheme.primary,
-//                        titleContentColor = MaterialTheme.colorScheme.onPrimary
-//                    )
-//                )
-//            }
-//        }
     ) { innerPadding ->
         Box(
             modifier = Modifier
