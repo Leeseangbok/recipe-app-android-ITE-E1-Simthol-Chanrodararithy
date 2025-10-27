@@ -8,6 +8,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.navigation.NavDestination.Companion.hierarchy // <-- IMPORT THIS
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.recipefinderapp.ui.navigation.Screen
@@ -21,18 +22,27 @@ fun BottomNavigationBar(navController: NavHostController) {
     )
     NavigationBar {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentRoute = navBackStackEntry?.destination?.route
-
+        val currentDestination = navBackStackEntry?.destination
         items.forEach { screen ->
+            val selected = currentDestination?.hierarchy?.any {
+                it.route == screen.route
+            } == true
+
             NavigationBarItem(
-                selected = currentRoute == screen.route,
+                selected = selected,
                 onClick = {
-                    navController.navigate(screen.route) {
+                    val routeToNavigate = if (screen == Screen.Explore) {
+                        Screen.Explore.createRoute()
+                    } else {
+                        screen.route
+                    }
+
+                    navController.navigate(routeToNavigate) {
                         popUpTo(navController.graph.startDestinationId) {
                             saveState = true
                         }
                         launchSingleTop = true
-                        restoreState = true
+                        restoreState = (screen != Screen.Explore)
                     }
                 },
                 icon = { screen.icon?.let { Icon(it, contentDescription = screen.title) } },

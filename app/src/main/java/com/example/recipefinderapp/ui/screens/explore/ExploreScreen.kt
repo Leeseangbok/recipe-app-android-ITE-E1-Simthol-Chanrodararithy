@@ -27,17 +27,27 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.AsyncImage
 import com.example.recipefinderapp.domain.model.Meal
 import com.example.recipefinderapp.ui.navigation.Screen
+
+// --- START IMPORTS ---
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+// --- END IMPORTS ---
 
 @Composable
 fun ExploreScreen(
@@ -54,47 +64,76 @@ fun ExploreScreen(
 
     val isLoading = categories.isEmpty() && areas.isEmpty()
 
-    Scaffold(
-//        topBar = {
-//            TopAppBar(title = { Text("Explore Recipes") })
-//        },
-        content = { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            ) {
+    val lazyListState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
 
-                Text("Filter by Category", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 16.dp))
-                CategoryChips(
-                    categories = categories,
-                    selectedCategory = selectedCategory,
-                    onCategorySelected = { viewModel.onCategorySelected(it) }
-                )
 
-                Spacer(modifier = Modifier.height(16.dp))
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    LaunchedEffect(navBackStackEntry) {
+        val category = navBackStackEntry?.arguments?.getString("category") ?: "All"
+        val area = navBackStackEntry?.arguments?.getString("area") ?: "All"
 
-                Text("Filter by Area", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 16.dp))
-                AreaChips(
-                    areas = areas,
-                    selectedArea = selectedArea,
-                    onAreaSelected = { viewModel.onAreaSelected(it) }
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-                Divider(modifier = Modifier.padding(horizontal = 16.dp))
-
-                if (isLoading && filteredMeals.isEmpty()) {
-                    CircularProgressIndicator(modifier = Modifier.padding(16.dp))
-                } else {
-                    MealList(
-                        meals = filteredMeals,
-                        navController = navController
-                    )
-                }
+        if (category != "All" || area != "All") {
+            coroutineScope.launch {
+                lazyListState.animateScrollToItem(0)
             }
         }
-    )
+
+        viewModel.onCategorySelected(category)
+        viewModel.onAreaSelected(area)
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(vertical = 8.dp)
+    ) {
+        Text(
+            "Explore",
+            style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier
+                .fillMaxWidth(),
+            textAlign = TextAlign.Center)
+
+        Text("Category", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 16.dp))
+        CategoryChips(
+            categories = categories,
+            selectedCategory = selectedCategory,
+            onCategorySelected = {
+                viewModel.onCategorySelected(it)
+                coroutineScope.launch {
+                    lazyListState.animateScrollToItem(0)
+                }
+            }
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text("Area", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 16.dp))
+        AreaChips(
+            areas = areas,
+            selectedArea = selectedArea,
+            onAreaSelected = {
+                viewModel.onAreaSelected(it)
+                coroutineScope.launch {
+                    lazyListState.animateScrollToItem(0)
+                }
+            }
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+        Divider(modifier = Modifier.padding(horizontal = 16.dp))
+
+        if (isLoading && filteredMeals.isEmpty()) {
+            CircularProgressIndicator(modifier = Modifier.padding(16.dp))
+        } else {
+            MealList(
+                meals = filteredMeals,
+                navController = navController,
+                listState = lazyListState
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -153,9 +192,11 @@ fun AreaChips(
 @Composable
 fun MealList(
     meals: List<Meal>,
-    navController: NavHostController
+    navController: NavHostController,
+    listState: LazyListState = rememberLazyListState()
 ) {
     LazyColumn(
+        state = listState,
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {

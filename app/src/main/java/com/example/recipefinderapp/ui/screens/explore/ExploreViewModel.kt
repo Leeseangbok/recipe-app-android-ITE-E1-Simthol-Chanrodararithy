@@ -1,6 +1,7 @@
 package com.example.recipefinderapp.ui.screens.explore
 
 import androidx.lifecycle.SavedStateHandle
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.recipefinderapp.data.repository.RecipeRepository
@@ -30,15 +31,14 @@ class ExploreViewModel @Inject constructor(
     val areas: StateFlow<List<String>> = _allMeals.map { meals ->
         meals.mapNotNull { it.area }.distinct().sorted()
     }.stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), emptyList())
-    private val _selectedCategory = MutableStateFlow<String>("All")
+    private val _selectedCategory = MutableStateFlow("All")
     val selectedCategory: StateFlow<String> = _selectedCategory.asStateFlow()
 
-    private val _selectedArea = MutableStateFlow<String>("All")
+    private val _selectedArea = MutableStateFlow("All")
     val selectedArea: StateFlow<String> = _selectedArea.asStateFlow()
 
     val filteredMeals: StateFlow<List<Meal>> =
         combine(_allMeals, _selectedCategory, _selectedArea) { meals, category, area ->
-
             val categoryFiltered = if (category == "All") {
                 meals
             } else {
@@ -53,31 +53,27 @@ class ExploreViewModel @Inject constructor(
         }.stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), emptyList())
 
     init {
-        val initialCategory = savedStateHandle.get<String>("category")
-        val initialArea = savedStateHandle.get<String>("area")
+        _selectedCategory.value = "All"
+        _selectedArea.value = "All"
 
-        if (initialCategory != null) {
-            _selectedCategory.value = initialCategory
-        } else {
-            _selectedCategory.value = "All"
-        }
-        if (initialArea != null) {
-            _selectedArea.value = initialArea
-        }
+
         loadData()
     }
-
     private fun loadData() {
         viewModelScope.launch {
+            Log.d("ExploreViewModel", "Loading data...")
             try {
                 _allMeals.value = repository.getMeals()
                 _categories.value = repository.getCategories()
+                Log.d("ExploreViewModel", "Data loaded successfully.")
             } catch (e: Exception) {
                 _allMeals.value = emptyList()
                 _categories.value = emptyList()
+                Log.e("ExploreViewModel", "Error loading data", e)
             }
         }
     }
+
 
     fun onCategorySelected(category: String) {
         _selectedCategory.value = category

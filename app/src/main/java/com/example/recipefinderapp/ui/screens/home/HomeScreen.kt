@@ -203,7 +203,9 @@ fun CategorySection(
         )
         Spacer(Modifier.height(8.dp))
         if(categories.isEmpty()){
-            CircularProgressIndicator(modifier = Modifier.padding(start = 16.dp))
+            Box(modifier = Modifier.fillMaxWidth().height(180.dp), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
         }else{
             LazyRow(
                 contentPadding = PaddingValues(horizontal = 16.dp),
