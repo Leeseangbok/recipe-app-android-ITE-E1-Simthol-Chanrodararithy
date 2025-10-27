@@ -31,31 +31,48 @@ class ExploreViewModel @Inject constructor(
     val areas: StateFlow<List<String>> = _allMeals.map { meals ->
         meals.mapNotNull { it.area }.distinct().sorted()
     }.stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), emptyList())
+
     private val _selectedCategory = MutableStateFlow("All")
     val selectedCategory: StateFlow<String> = _selectedCategory.asStateFlow()
 
     private val _selectedArea = MutableStateFlow("All")
     val selectedArea: StateFlow<String> = _selectedArea.asStateFlow()
 
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
     val filteredMeals: StateFlow<List<Meal>> =
-        combine(_allMeals, _selectedCategory, _selectedArea) { meals, category, area ->
+        combine(
+            _allMeals,
+            _selectedCategory,
+            _selectedArea,
+            _searchQuery
+        ) { meals, category, area, query ->
             val categoryFiltered = if (category == "All") {
                 meals
             } else {
                 meals.filter { it.category == category }
             }
 
-            if (area == "All") {
+            val areaFiltered = if (area == "All") {
                 categoryFiltered
             } else {
                 categoryFiltered.filter { it.area == area }
+            }
+
+            if (query.isBlank()) {
+                areaFiltered
+            } else {
+                areaFiltered.filter {
+                    it.name.contains(query, ignoreCase = true)
+                }
             }
         }.stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), emptyList())
 
     init {
         _selectedCategory.value = "All"
         _selectedArea.value = "All"
-
+        _searchQuery.value = ""
 
         loadData()
     }
@@ -81,5 +98,9 @@ class ExploreViewModel @Inject constructor(
 
     fun onAreaSelected(area: String) {
         _selectedArea.value = area
+    }
+
+    fun onSearchQueryChanged(query: String) {
+        _searchQuery.value = query
     }
 }

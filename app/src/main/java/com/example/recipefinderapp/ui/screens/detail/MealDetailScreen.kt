@@ -3,50 +3,33 @@ package com.example.recipefinderapp.ui.screens.detail
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.outlined.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.compose.material3.*
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.example.recipefinderapp.domain.model.IngredientMeasure
 import com.example.recipefinderapp.domain.model.Meal
-import androidx.compose.foundation.layout.FlowRow
-import com.example.recipefinderapp.domain.model.IngredientMeasure // <-- Import new class
-import androidx.compose.material.icons.outlined.Kitchen
-import androidx.compose.material.icons.outlined.Label
-import androidx.compose.material.icons.outlined.PlayCircle
-import androidx.compose.material.icons.outlined.RestaurantMenu
 
-
-@ExperimentalMaterial3Api
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MealDetailScreen(
     navController: NavController,
@@ -57,169 +40,197 @@ fun MealDetailScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val context = LocalContext.current
 
-            TopAppBar(
-                title = {
-                    val titleText = if (isLoading) "Loading..." else meal?.name ?: "Meal Detail"
-                    Text(
-                        text = titleText,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back"
-                        )
-                    }
-                })
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(vertical = 8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else {
-            meal?.let { currentMeal ->
-                val ingredients = currentMeal.ingredients
-                    ?.filter {
-                        !it.ingredient.isNullOrBlank() && !it.measure.isNullOrBlank()
-                    } ?: emptyList()
+    if (isLoading) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
 
-                Column(
+    meal?.let { currentMeal ->
+        val ingredients = currentMeal.ingredients
+            ?.filter { !it.ingredient.isNullOrBlank() && !it.measure.isNullOrBlank() }
+            ?: emptyList()
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surface)
+            ) {
+                // --- Hero Header Image ---
+                Box(
                     modifier = Modifier
-                        .padding(vertical = 8.dp)
-                        .verticalScroll(rememberScrollState())
+                        .fillMaxWidth()
+                        .height(280.dp)
+                        .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
                 ) {
                     Image(
                         painter = rememberAsyncImagePainter(currentMeal.image),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp)
+                        modifier = Modifier.fillMaxSize()
                     )
 
+                    // Gradient overlay for better text visibility
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(
+                                        Color.Transparent,
+                                        Color.Black.copy(alpha = 0.6f)
+                                    )
+                                )
+                            )
+                    )
+
+                    // Title text
                     Text(
                         text = currentMeal.name,
-                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
-                    )
-
-                    Row(
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        ),
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        InfoChip(text = "Category: ${currentMeal.category}")
-                        InfoChip(text = "Area: ${currentMeal.area}")
-                    }
-
-                    currentMeal.tags?.let { tagsString ->
-                        if (tagsString.isNotBlank()) {
-                            val tags = tagsString.split(",").filter { it.isNotBlank() }
-                            Spacer(Modifier.height(16.dp))
-                            SectionHeader(
-                                icon = Icons.Outlined.Label,
-                                title = "Tags"
-                            )
-                            FlowRow(
-                                modifier = Modifier.padding(horizontal = 16.dp)
-                            ) {
-                                tags.forEach { TagChip(text = it) }
-                            }
-                        }
-                    }
-
-                    Spacer(Modifier.height(16.dp))
-                    SectionHeader(
-                        icon = Icons.Outlined.Kitchen,
-                        title = "Ingredients"
+                            .align(Alignment.BottomStart)
+                            .padding(20.dp)
                     )
-                    Card(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            ingredients.forEach { item ->
-                                IngredientRow(ingredient = item.ingredient!!, measure = item.measure!!)
-                            }
-                        }
-                    }
-
-                    Spacer(Modifier.height(16.dp))
-                    SectionHeader(
-                        icon = Icons.Outlined.RestaurantMenu,
-                        title = "Instructions"
-                    )
-                    currentMeal.instructions?.let { text ->
-                        Text(
-                            text = text,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
-                    }
-
-                    currentMeal.youtube?.let { youtubeUrl ->
-                        if (youtubeUrl.isNotBlank()) {
-                            Spacer(Modifier.height(16.dp))
-                            Button(
-                                onClick = {
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(youtubeUrl))
-                                    context.startActivity(intent)
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.PlayCircle,
-                                    contentDescription = "YouTube"
-                                )
-                                Spacer(Modifier.width(8.dp))
-                                Text("Watch on YouTube")
-                            }
-                        }
-                    }
-                    Spacer(Modifier.height(32.dp))
                 }
-            } ?: run {
-                Box(
+
+                // --- Chips Section ---
+                Spacer(Modifier.height(12.dp))
+                Row(
                     modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text("Meal not found")
+                    InfoChip(text = "Category: ${currentMeal.category}")
+                    InfoChip(text = "Area: ${currentMeal.area}")
                 }
+
+                // --- Tags ---
+                currentMeal.tags?.let { tagsString ->
+                    val tags = tagsString.split(",").filter { it.isNotBlank() }
+                    if (tags.isNotEmpty()) {
+                        SectionHeader(Icons.Outlined.Label, "Tags")
+                        FlowRow(
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+                        ) {
+                            tags.forEach { TagChip(it.trim()) }
+                        }
+                    }
+                }
+
+                // --- Ingredients ---
+                SectionHeader(Icons.Outlined.Kitchen, "Ingredients")
+                Card(
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp, vertical = 8.dp)
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        ingredients.forEach {
+                            IngredientRow(it.ingredient!!, it.measure!!)
+                        }
+                    }
+                }
+
+                // --- Instructions ---
+                SectionHeader(Icons.Outlined.RestaurantMenu, "Instructions")
+                Text(
+                    text = currentMeal.instructions ?: "",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+                )
+
+                // --- YouTube Button ---
+                currentMeal.youtube?.let { youtubeUrl ->
+                    if (youtubeUrl.isNotBlank()) {
+                        Spacer(Modifier.height(16.dp))
+                        Button(
+                            onClick = {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(youtubeUrl))
+                                context.startActivity(intent)
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(Icons.Outlined.PlayCircle, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Watch on YouTube")
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(40.dp))
+            }
+
+            // --- Floating Back Button ---
+            IconButton(
+                onClick = { navController.navigateUp() },
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .padding(12.dp)
+                    .size(40.dp)
+                    .align(Alignment.TopStart)
+                    .background(
+                        color = Color.Black.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(50)
+                    )
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color.White
+                )
             }
         }
+    } ?: run {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Meal not found")
+        }
     }
+}
+
 @Composable
 fun SectionHeader(icon: ImageVector, title: String) {
     Row(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(imageVector = icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
         Spacer(Modifier.width(8.dp))
-                Text(
+        Text(
             text = title,
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
-                )
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        )
     }
 }
 
 @Composable
 fun InfoChip(text: String) {
     Surface(
-        shape = MaterialTheme.shapes.small,
+        shape = RoundedCornerShape(50),
         color = MaterialTheme.colorScheme.secondaryContainer,
-        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+        tonalElevation = 2.dp
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodySmall,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
         )
     }
@@ -228,14 +239,13 @@ fun InfoChip(text: String) {
 @Composable
 fun TagChip(text: String) {
     Surface(
-        shape = MaterialTheme.shapes.small,
+        shape = RoundedCornerShape(50),
         color = MaterialTheme.colorScheme.tertiaryContainer,
-        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
         modifier = Modifier.padding(end = 8.dp, bottom = 8.dp)
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
         )
     }
@@ -247,7 +257,7 @@ fun IngredientRow(ingredient: String, measure: String) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.Top
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = "• $ingredient",
@@ -256,8 +266,10 @@ fun IngredientRow(ingredient: String, measure: String) {
         )
         Text(
             text = measure,
-            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-            modifier = Modifier.padding(start = 16.dp)
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary
+            )
         )
     }
 }

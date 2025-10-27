@@ -3,37 +3,31 @@
 package com.example.recipefinderapp.ui.screens.explore
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -41,13 +35,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.AsyncImage
 import com.example.recipefinderapp.domain.model.Meal
 import com.example.recipefinderapp.ui.navigation.Screen
-
-// --- START IMPORTS ---
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
-// --- END IMPORTS ---
 
 @Composable
 fun ExploreScreen(
@@ -56,78 +44,105 @@ fun ExploreScreen(
 ) {
     val categories by viewModel.categories.collectAsState()
     val selectedCategory by viewModel.selectedCategory.collectAsState()
-
     val areas by viewModel.areas.collectAsState()
     val selectedArea by viewModel.selectedArea.collectAsState()
-
     val filteredMeals by viewModel.filteredMeals.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
 
     val isLoading = categories.isEmpty() && areas.isEmpty()
-
-    val lazyListState = rememberLazyListState()
+    val lazyListState = rememberLazyGridState()
     val coroutineScope = rememberCoroutineScope()
-
+    val focusManager = LocalFocusManager.current
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     LaunchedEffect(navBackStackEntry) {
         val category = navBackStackEntry?.arguments?.getString("category") ?: "All"
         val area = navBackStackEntry?.arguments?.getString("area") ?: "All"
-
         if (category != "All" || area != "All") {
-            coroutineScope.launch {
-                lazyListState.animateScrollToItem(0)
-            }
+            coroutineScope.launch { lazyListState.animateScrollToItem(0) }
         }
-
         viewModel.onCategorySelected(category)
         viewModel.onAreaSelected(area)
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(vertical = 8.dp)
-    ) {
+    Column(modifier = Modifier.fillMaxSize()) {
         Text(
-            "Explore",
-            style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
+            text = "Explore",
+            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
             modifier = Modifier
-                .fillMaxWidth(),
-            textAlign = TextAlign.Center)
+                .fillMaxWidth()
+                .padding(top = 12.dp, bottom = 4.dp),
+            textAlign = TextAlign.Center
+        )
+        Divider(color = Color.LightGray, thickness = 1.dp)
 
-        Text("Category", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 16.dp))
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { viewModel.onSearchQueryChanged(it) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            label = { Text("Search recipes...") },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
+            trailingIcon = {
+                if (searchQuery.isNotEmpty()) {
+                    IconButton(onClick = {
+                        viewModel.onSearchQueryChanged("")
+                        focusManager.clearFocus()
+                    }) {
+                        Icon(Icons.Default.Clear, contentDescription = "Clear")
+                    }
+                }
+            },
+            shape = RoundedCornerShape(28.dp),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
+            singleLine = true
+        )
+
+        SectionTitle("Category")
         CategoryChips(
             categories = categories,
             selectedCategory = selectedCategory,
             onCategorySelected = {
                 viewModel.onCategorySelected(it)
-                coroutineScope.launch {
-                    lazyListState.animateScrollToItem(0)
-                }
+                coroutineScope.launch { lazyListState.animateScrollToItem(0) }
             }
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text("Area", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 16.dp))
+        SectionTitle("Area")
         AreaChips(
             areas = areas,
             selectedArea = selectedArea,
             onAreaSelected = {
                 viewModel.onAreaSelected(it)
-                coroutineScope.launch {
-                    lazyListState.animateScrollToItem(0)
-                }
+                coroutineScope.launch { lazyListState.animateScrollToItem(0) }
             }
         )
 
         Spacer(modifier = Modifier.height(8.dp))
         Divider(modifier = Modifier.padding(horizontal = 16.dp))
 
-        if (isLoading && filteredMeals.isEmpty()) {
-            CircularProgressIndicator(modifier = Modifier.padding(16.dp))
-        } else {
-            MealList(
+        when {
+            isLoading && filteredMeals.isEmpty() -> Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+
+            filteredMeals.isEmpty() -> Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("No recipes found.", style = MaterialTheme.typography.bodyMedium)
+            }
+
+            else -> MealList(
                 meals = filteredMeals,
                 navController = navController,
                 listState = lazyListState
@@ -136,7 +151,15 @@ fun ExploreScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SectionTitle(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
+        modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 4.dp)
+    )
+}
+
 @Composable
 fun CategoryChips(
     categories: List<com.example.recipefinderapp.domain.model.Category>,
@@ -147,7 +170,7 @@ fun CategoryChips(
     val displayCategories = listOf(allCategory) + categories
 
     LazyRow(
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        contentPadding = PaddingValues(horizontal = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(displayCategories) { category ->
@@ -163,7 +186,6 @@ fun CategoryChips(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AreaChips(
     areas: List<String>,
@@ -171,9 +193,8 @@ fun AreaChips(
     onAreaSelected: (String) -> Unit
 ) {
     val displayAreas = listOf("All") + areas
-
     LazyRow(
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        contentPadding = PaddingValues(horizontal = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(displayAreas) { area ->
@@ -193,12 +214,14 @@ fun AreaChips(
 fun MealList(
     meals: List<Meal>,
     navController: NavHostController,
-    listState: LazyListState = rememberLazyListState()
+    listState: LazyGridState = rememberLazyGridState()
 ) {
-    LazyColumn(
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
         state = listState,
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(meals) { meal ->
             MealListItem(meal = meal, onClick = {
@@ -209,14 +232,13 @@ fun MealList(
 }
 
 @Composable
-fun MealListItem(
-    meal: Meal,
-    onClick: () -> Unit
-) {
+fun MealListItem(meal: Meal, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
+            .clickable { onClick() },
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
     ) {
         Column {
             AsyncImage(
@@ -225,12 +247,13 @@ fun MealListItem(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp)
+                    .height(160.dp)
             )
             Text(
                 text = meal.name,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                modifier = Modifier.padding(16.dp)
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Medium),
+                modifier = Modifier.padding(12.dp),
+                maxLines = 1
             )
         }
     }
