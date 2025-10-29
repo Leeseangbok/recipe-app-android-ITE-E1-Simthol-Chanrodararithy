@@ -53,7 +53,6 @@ fun HomeScreen(
                 textAlign = TextAlign.Center
             )
             Divider(color = Color.LightGray, thickness = 1.dp)
-
             HomeContent(
                 modifier = Modifier.padding(),
                 navController = navController,

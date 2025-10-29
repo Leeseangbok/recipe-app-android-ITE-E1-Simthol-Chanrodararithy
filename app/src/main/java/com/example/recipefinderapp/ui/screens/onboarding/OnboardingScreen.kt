@@ -70,8 +70,6 @@ fun OnboardingScreen(navController: NavController) {
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
-                // Skip button top-right
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -86,9 +84,7 @@ fun OnboardingScreen(navController: NavController) {
                         Text("Skip", color = MaterialTheme.colorScheme.primary)
                     }
                 }
-
                 Spacer(modifier = Modifier.height(24.dp))
-
                 HorizontalPager(
                     state = pagerState,
                     modifier = Modifier
@@ -97,10 +93,7 @@ fun OnboardingScreen(navController: NavController) {
                 ) { page ->
                     OnboardingPageContent(pages[page])
                 }
-
                 Spacer(modifier = Modifier.height(16.dp))
-
-                // Page indicator dots
                 Row(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
@@ -123,10 +116,7 @@ fun OnboardingScreen(navController: NavController) {
                         )
                     }
                 }
-
                 Spacer(modifier = Modifier.height(24.dp))
-
-                // Next / Start button
                 Button(
                     onClick = {
                         coroutineScope.launch {
@@ -150,7 +140,6 @@ fun OnboardingScreen(navController: NavController) {
                         fontWeight = FontWeight.SemiBold
                     )
                 }
-
                 Spacer(modifier = Modifier.height(32.dp))
             }
         }
@@ -176,7 +165,6 @@ fun OnboardingPageContent(page: OnboardingPage) {
                 .scale(scale)
         )
         Spacer(modifier = Modifier.height(36.dp))
-
         Surface(
             color = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(24.dp),

@@ -1,8 +1,6 @@
 package com.example.recipefinderapp.domain.model
 
 import com.google.gson.annotations.SerializedName
-
-// --- ADD THIS NEW DATA CLASS ---
 data class IngredientMeasure(
     @SerializedName("ingredient") val ingredient: String?,
     @SerializedName("measure") val measure: String?

@@ -41,14 +41,11 @@ class HomeViewModel @Inject constructor(
             try {
                 val allMeals = repository.getMeals()
                 val allCategories = repository.getCategories()
-
                 _meals.value = allMeals
                 _categories.value = allCategories
-
                 if (_randomMeal.value == null) {
                     _randomMeal.value = allMeals.randomOrNull()
                 }
-
             } catch (e: Exception) {
                 _meals.value = emptyList()
                 _categories.value = emptyList()

@@ -52,7 +52,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
 @Composable
 fun shouldShowBottomBar(destination: NavDestination?): Boolean {
     return destination?.hierarchy?.any{

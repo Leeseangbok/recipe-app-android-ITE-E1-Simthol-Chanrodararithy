@@ -14,8 +14,6 @@ import javax.inject.Inject
 class FavoriteViewModel @Inject constructor(
     private val repository: RecipeRepository
 ) : ViewModel() {
-
-    // Expose the flow of favorite recipes from the repository
     val favoriteMeals: StateFlow<List<RecipeEntity>> = repository.getFavorites()
         .stateIn(
             scope = viewModelScope,

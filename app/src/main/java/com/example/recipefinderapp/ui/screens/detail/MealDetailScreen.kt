@@ -39,7 +39,7 @@ fun MealDetailScreen(
 ) {
     val meal by viewModel.meal.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
-    val isFavorite by viewModel.isFavorite.collectAsState() // --- NEW ---
+    val isFavorite by viewModel.isFavorite.collectAsState()
     val context = LocalContext.current
 
     if (isLoading) {
@@ -61,7 +61,6 @@ fun MealDetailScreen(
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.surface)
             ) {
-                // --- Hero Header Image ---
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -74,8 +73,6 @@ fun MealDetailScreen(
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
                     )
-
-                    // Gradient overlay for better text visibility
                     Box(
                         modifier = Modifier
                             .matchParentSize()
@@ -88,8 +85,6 @@ fun MealDetailScreen(
                                 )
                             )
                     )
-
-                    // Title text
                     Text(
                         text = currentMeal.name,
                         style = MaterialTheme.typography.headlineSmall.copy(
@@ -101,8 +96,6 @@ fun MealDetailScreen(
                             .padding(20.dp)
                     )
                 }
-
-                // --- Chips Section ---
                 Spacer(Modifier.height(12.dp))
                 Row(
                     modifier = Modifier
@@ -113,8 +106,6 @@ fun MealDetailScreen(
                     InfoChip(text = "Category: ${currentMeal.category}")
                     InfoChip(text = "Area: ${currentMeal.area}")
                 }
-
-                // --- Tags ---
                 currentMeal.tags?.let { tagsString ->
                     val tags = tagsString.split(",").filter { it.isNotBlank() }
                     if (tags.isNotEmpty()) {
@@ -126,8 +117,6 @@ fun MealDetailScreen(
                         }
                     }
                 }
-
-                // --- Ingredients ---
                 SectionHeader(Icons.Outlined.Kitchen, "Ingredients")
                 Card(
                     modifier = Modifier
@@ -145,16 +134,12 @@ fun MealDetailScreen(
                         }
                     }
                 }
-
-                // --- Instructions ---
                 SectionHeader(Icons.Outlined.RestaurantMenu, "Instructions")
                 Text(
                     text = currentMeal.instructions ?: "",
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
                 )
-
-                // --- YouTube Button ---
                 currentMeal.youtube?.let { youtubeUrl ->
                     if (youtubeUrl.isNotBlank()) {
                         Spacer(Modifier.height(16.dp))

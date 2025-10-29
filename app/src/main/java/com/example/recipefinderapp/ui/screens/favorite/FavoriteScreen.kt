@@ -28,7 +28,6 @@ fun FavoriteScreen(
     viewModel: FavoriteViewModel = hiltViewModel()
 ) {
     val favoriteMeals by viewModel.favoriteMeals.collectAsState()
-
     Scaffold(
         topBar = {
             Column {
